@@ -681,7 +681,7 @@ public final class EnemyTank extends Sprite {
                                 i2++;
                             }
                         }
-                        if (i2 == 4) {
+                        if (i2 > 0) {
                             while (i3 < 4) {
                                 if (this.passableDirs[this.dirPriority[i3]]) {
                                     this.direction = this.dirPriority[i3];
