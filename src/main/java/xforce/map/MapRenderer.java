@@ -9,6 +9,8 @@ import javax.microedition.lcdui.Image;
 
 public final class MapRenderer {
 
+    public static final boolean DEBUG_BLOCKED_TILES = false;
+
     private static final int TILE_COUNT    = 79;
     private static final int TILE_EMPTY    = 1;
     private static final int TILE_WATER_1  = 36;
@@ -94,6 +96,17 @@ public final class MapRenderer {
                 tileHp[i][i2] = tilePassability[tileMap[i][i2]];
             }
         }
+        if (DEBUG_BLOCKED_TILES) {
+            StringBuilder sb = new StringBuilder("INIT BLOCKED TILES: ");
+            for (int r = 0; r < mapHeight; r++) {
+                for (int c = 0; c < mapWidth; c++) {
+                    if (tileHp[r][c] != 0 && tileMap[r][c] != TILE_TREE) {
+                        sb.append("(").append(r).append(",").append(c).append(")t").append(tileMap[r][c]).append("hp").append((int)tileHp[r][c]).append(" ");
+                    }
+                }
+            }
+            System.out.println(sb.toString());
+        }
     }
     public static void renderTiles(Graphics graphics) {
         viewColStart = (-graphics.getTranslateY()) / tileSize;
@@ -112,6 +125,10 @@ public final class MapRenderer {
                 while (curTileRow < maxTileCol) {
                     if (viewRowEnd >= 0 && viewRowEnd < mapWidth && tileMap[viewRowStart][viewRowEnd] > 0) {
                         graphics.drawImage(tileImages[tileMap[viewRowStart][viewRowEnd] - 1], curTileRow, renderCol, 0);
+                        if (DEBUG_BLOCKED_TILES && tileHp[viewRowStart][viewRowEnd] != 0 && tileMap[viewRowStart][viewRowEnd] != TILE_TREE) {
+                            graphics.setColor(16711680);
+                            graphics.drawRect(curTileRow, renderCol, 23, 23);
+                        }
                         if (tilesetId == 2) {
                             if (tileMap[viewRowStart][viewRowEnd] == TILE_WATER_1 || tileMap[viewRowStart][viewRowEnd] == TILE_WATER_2) {
                                 short[] sArr = tileMap[viewRowStart];

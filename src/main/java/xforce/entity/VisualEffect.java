@@ -69,7 +69,6 @@ public final class VisualEffect extends GameEntity {
             this.effectType = TYPE_SMOKE;
         }
         if (type == TYPE_DEBRIS && ResourceManager.randomInt(2) == 0) {
-            System.out.println("exp 1b");
             this.effectType = TYPE_DEBRIS_SPARKS;
         }
         if (type == TYPE_SPOTLIGHT || type == TYPE_SMALL_SPOT || type == TYPE_SMALL_SPOT2) {

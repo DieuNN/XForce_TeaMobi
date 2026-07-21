@@ -213,7 +213,7 @@ public final class GameLevel extends GameScreen {
                         Sprite[] entityArr = entities;
                         int i8 = entityCount;
                         entityCount = i8 + 1;
-                        Sprite entity = new Sprite(i7 * MapRenderer.tileSize, i6 * MapRenderer.tileSize, bArrM86b[(i6 * i4) + i7] != 0 ? (byte) 1 : (byte) 0);
+                        Sprite entity = new Sprite(i7 * MapRenderer.tileSize, i6 * MapRenderer.tileSize, bArrM86b[(i6 * i4) + i7]);
                         entityArr[i8] = entity;
                         tileOccupancy[i6][i7] = entity;
                         break;
@@ -233,7 +233,7 @@ public final class GameLevel extends GameScreen {
                         Sprite[] entityArr3 = entities;
                         int i10 = entityCount;
                         entityCount = i10 + 1;
-                        EnemyTurret turret = new EnemyTurret(i7 * MapRenderer.tileSize, i6 * MapRenderer.tileSize, bArrM86b[(i6 * i4) + i7] != 0 ? (byte) 1 : (byte) 0);
+                        EnemyTurret turret = new EnemyTurret(i7 * MapRenderer.tileSize, i6 * MapRenderer.tileSize, bArrM86b[(i6 * i4) + i7]);
                         entityArr3[i10] = turret;
                         tileOccupancy[i6][i7] = turret;
                         entities[entityCount - 1].target = player;
@@ -798,6 +798,8 @@ public final class GameLevel extends GameScreen {
         return i >= i3 && i2 >= i4 && i < i3 + i5 && i2 < i4 + i6;
     }
 
+    private int debugDumpTimer = 0;
+
     @Override
     public final void update() {
         if (loadingScreen) {
@@ -807,6 +809,20 @@ public final class GameLevel extends GameScreen {
                 return;
             }
             return;
+        }
+        if (MapRenderer.DEBUG_BLOCKED_TILES) {
+            debugDumpTimer++;
+            if (debugDumpTimer == 60) {
+                StringBuilder sb = new StringBuilder("RUNTIME BLOCKED TILES: ");
+                for (int r = 0; r < MapRenderer.mapHeight; r++) {
+                    for (int c = 0; c < MapRenderer.mapWidth; c++) {
+                        if (MapRenderer.tileHp[r][c] != 0 && MapRenderer.tileMap[r][c] != 40) {
+                            sb.append("(").append(r).append(",").append(c).append(")t").append(MapRenderer.tileMap[r][c]).append("hp").append((int)MapRenderer.tileHp[r][c]).append(" ");
+                        }
+                    }
+                }
+                System.out.println(sb.toString());
+            }
         }
         if (gameOverTimer > 0) {
             if (gameOverTimer > 2) {

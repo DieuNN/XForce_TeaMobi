@@ -69,3 +69,12 @@ jar {
         )
     }
 }
+
+task runOriginal(type: JavaExec) {
+    group = 'application'
+    description = 'Run the original XForce.jar for comparison'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'org.microemu.app.Main'
+    args = [file('XForce.jar').absolutePath]
+    jvmArgs = tasks.runMidlet.jvmArgs
+}

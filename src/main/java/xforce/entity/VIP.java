@@ -110,6 +110,7 @@ public final class VIP extends Sprite {
                                     this.velocityX = this.dirVectorsX[this.dirPriority[dirIndex]] * this.walkSpeed;
                                     this.velocityY = this.dirVectorsY[this.dirPriority[dirIndex]] * this.walkSpeed;
                                     this.angle = this.direction * 90;
+                                    break;
                                 }
                             }
                         }

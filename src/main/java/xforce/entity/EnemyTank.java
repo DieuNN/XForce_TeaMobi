@@ -55,8 +55,8 @@ public final class EnemyTank extends Sprite {
     private static final int PATHFIND_RANGE_SHORT = 4;
     private static final int STUCK_BASE           = 15;
 
-    private static final int DESTRUCTIBLE_TILE_MIN = 12;
-    private static final int DESTRUCTIBLE_TILE_MAX = 24;
+    private static final int ROAD_TILE_MIN = 12;
+    private static final int ROAD_TILE_MAX = 24;
 
     private static final byte EFFECT_DEBRIS     = 0;
     private static final byte EFFECT_EXPLOSION  = 6;
@@ -288,15 +288,6 @@ public final class EnemyTank extends Sprite {
 
     @Override // p000.GameEntity
     public final void update() {
-        boolean z;
-        boolean z2;
-        boolean z3;
-        boolean z4;
-        int i = 0;
-        int i2 = 0;
-        int i3 = 0;
-        int i4;
-        int i5;
         if (this.invincibilityTimer > 0) {
             if (this.invincibilityTimer > 0) {
                 this.invincibilityTimer--;
@@ -452,266 +443,128 @@ public final class EnemyTank extends Sprite {
                     this.moveSpeed = BOSS_SPEED_FASTEST;
                 }
             }
-            boolean z5 = false;
-            int i8 = this.y / MapRenderer.tileSize;
-            int i9 = this.x / MapRenderer.tileSize;
+            boolean foundDirection = false;
+            int row = this.y / MapRenderer.tileSize;
+            int col = this.x / MapRenderer.tileSize;
+            boolean skipDecisions = false;
             if (this.stuckTimer > 1) {
                 this.stuckTimer--;
+                skipDecisions = !this.smartPathfinding;
+            }
+            if (!skipDecisions) {
+                GameLevel.clearTileOccupant(row - this.dirVectorsY[this.direction], col - this.dirVectorsX[this.direction], this);
+                this.passableDirs[DIR_EAST] = !MapRenderer.isBlocked(row, col + 1);
+                this.passableDirs[DIR_SOUTH] = !MapRenderer.isBlocked(row + 1, col);
+                this.passableDirs[DIR_WEST] = !MapRenderer.isBlocked(row, col - 1);
+                this.passableDirs[DIR_NORTH] = !MapRenderer.isBlocked(row - 1, col);
                 if (this.smartPathfinding) {
-                    GameLevel.clearTileOccupant(i8 - this.dirVectorsY[this.direction], i9 - this.dirVectorsX[this.direction], this);
-                    boolean[] zArr = this.passableDirs;
-                    if (MapRenderer.isBlocked(i8, i9 + 1)) {
-                        z = false;
-                    } else {
-                        z = true;
-                    }
-                    zArr[0] = z;
-                    boolean[] zArr2 = this.passableDirs;
-                    if (MapRenderer.isBlocked(i8 + 1, i9)) {
-                        z2 = false;
-                    } else {
-                        z2 = true;
-                    }
-                    zArr2[1] = z2;
-                    boolean[] zArr3 = this.passableDirs;
-                    if (MapRenderer.isBlocked(i8, i9 - 1)) {
-                        z3 = false;
-                    } else {
-                        z3 = true;
-                    }
-                    zArr3[2] = z3;
-                    boolean[] zArr4 = this.passableDirs;
-                    if (MapRenderer.isBlocked(i8 - 1, i9)) {
-                        z4 = false;
-                    } else {
-                        z4 = true;
-                    }
-                    zArr4[3] = z4;
-                    if (this.smartPathfinding) {
-                        i4 = ((this.target.x + 12) / 24) - ((this.x + TILE_HALF) / 24);
-                        i5 = ((this.target.y + 12) / 24) - ((this.y + TILE_HALF) / 24);
-                        if (Math.abs(i4) < PATHFIND_RANGE_LONG && Math.abs(i5) < PATHFIND_RANGE_LONG) {
-                            if ((i4 != 0 || i5 == 0) && Math.abs(i4) < PATHFIND_RANGE_SHORT && Math.abs(i5) < PATHFIND_RANGE_SHORT) {
-                                if (i4 > 0) {
-                                    this.direction = 0;
-                                }
-                                if (i4 < 0) {
-                                    this.direction = 2;
-                                }
-                                if (i5 > 0) {
-                                    this.direction = 1;
-                                }
-                                if (i5 < 0) {
-                                    this.direction = 3;
-                                }
-                                this.velocityX = 0;
-                                this.velocityY = 0;
-                                z5 = true;
-                            } else {
-                                for (int i10 = 0; i10 < 4; i10++) {
-                                    if (this.passableDirs[this.dirPriority[i10]]) {
-                                        switch (this.dirPriority[i10]) {
-                                            case DIR_EAST:
-                                                if (i4 > 0) {
-                                                    z5 = true;
-                                                }
-                                                break;
-                                            case DIR_SOUTH:
-                                                if (i5 > 0) {
-                                                    z5 = true;
-                                                }
-                                                break;
-                                            case DIR_WEST:
-                                                if (i4 < 0) {
-                                                    z5 = true;
-                                                }
-                                                break;
-                                            case DIR_NORTH:
-                                                if (i5 < 0) {
-                                                    z5 = true;
-                                                }
-                                                break;
-                                        }
-                                        if (z5) {
-                                            this.direction = this.dirPriority[i10];
-                                            this.velocityX = this.dirVectorsX[this.dirPriority[i10]] * this.moveSpeed;
-                                            this.velocityY = this.dirVectorsY[this.dirPriority[i10]] * this.moveSpeed;
-                                            this.angle = this.direction * ANGLES_PER_DIR;
-                                        }
-                                    }
-                                }
+                    int targetDx = ((this.target.x + TILE_HALF) / 24) - ((this.x + TILE_HALF) / 24);
+                    int targetDy = ((this.target.y + TILE_HALF) / 24) - ((this.y + TILE_HALF) / 24);
+                    if (Math.abs(targetDx) < PATHFIND_RANGE_LONG && Math.abs(targetDy) < PATHFIND_RANGE_LONG) {
+                        if ((targetDx == 0 || targetDy == 0) && Math.abs(targetDx) < PATHFIND_RANGE_SHORT && Math.abs(targetDy) < PATHFIND_RANGE_SHORT) {
+                            if (targetDx > 0) {
+                                this.direction = DIR_EAST;
                             }
-                        }
-                    }
-                    if (!z5) {
-                        if (this.stuckTimer == 1) {
-                            for (i = 0; i < 4; i++) {
-                                byte b = this.dirPriority[Math.abs(ResourceManager.randomInt(4))];
-                                byte b2 = this.dirPriority[i];
-                                this.dirPriority[i] = this.dirPriority[b];
-                                this.dirPriority[b] = b2;
+                            if (targetDx < 0) {
+                                this.direction = DIR_WEST;
+                            }
+                            if (targetDy > 0) {
+                                this.direction = DIR_SOUTH;
+                            }
+                            if (targetDy < 0) {
+                                this.direction = DIR_NORTH;
                             }
                             this.velocityX = 0;
                             this.velocityY = 0;
-                            for (i2 = 0; i2 < 4; i2++) {
-                                if (!this.passableDirs[this.dirPriority[i2]] && MapRenderer.tileMap[i8 + this.dirVectorsY[this.dirPriority[i2]]][i9 + this.dirVectorsX[this.dirPriority[i2]]] >= DESTRUCTIBLE_TILE_MIN && MapRenderer.tileMap[i8 + this.dirVectorsY[this.dirPriority[i2]]][i9 + this.dirVectorsX[this.dirPriority[i2]]] < DESTRUCTIBLE_TILE_MAX) {
-                                    this.direction = this.dirPriority[i2];
-                                    this.velocityX = this.dirVectorsX[this.dirPriority[i2]] * this.moveSpeed;
-                                    this.velocityY = this.dirVectorsY[this.dirPriority[i2]] * this.moveSpeed;
-                                    this.angle = this.direction * ANGLES_PER_DIR;
-                                    if (i2 == 4) {
-                                        for (i3 = 0; i3 < 4; i3++) {
-                                            if (this.passableDirs[this.dirPriority[i3]]) {
-                                                this.direction = this.dirPriority[i3];
-                                                this.velocityX = this.dirVectorsX[this.dirPriority[i3]] * this.moveSpeed;
-                                                this.velocityY = this.dirVectorsY[this.dirPriority[i3]] * this.moveSpeed;
-                                                this.angle = this.direction * ANGLES_PER_DIR;
-                                            }
-                                        }
-                                    }
-                                    this.stuckTimer = 0;
-                                }
-                            }
-                            if (i2 == 4) {
-                                while (i3 < 4) {
-                                    if (this.passableDirs[this.dirPriority[i3]]) {
-                                        this.direction = this.dirPriority[i3];
-                                        this.velocityX = this.dirVectorsX[this.dirPriority[i3]] * this.moveSpeed;
-                                        this.velocityY = this.dirVectorsY[this.dirPriority[i3]] * this.moveSpeed;
-                                        this.angle = this.direction * ANGLES_PER_DIR;
-                                        break;
-                                    }
-                                    i3++;
-                                }
-                            }
-                            this.stuckTimer = 0;
-                        } else if (this.passableDirs[this.direction] || ResourceManager.randomInt(10) == 0) {
-                            this.stuckTimer = STUCK_BASE + ResourceManager.randomInt(10);
-                            this.velocityX = 0;
-                            this.velocityY = 0;
-                        }
-                    }
-                    if (this.velocityX == 0 || this.velocityY != 0) {
-                        GameLevel.setTileOccupant(i8 + this.dirVectorsY[this.direction], i9 + this.dirVectorsX[this.direction], this);
-                    }
-                }
-            } else {
-                GameLevel.clearTileOccupant(i8 - this.dirVectorsY[this.direction], i9 - this.dirVectorsX[this.direction], this);
-                boolean[] zArr5 = this.passableDirs;
-                if (MapRenderer.isBlocked(i8, i9 + 1)) {
-                    z = false;
-                } else {
-                    z = true;
-                }
-                zArr5[0] = z;
-                boolean[] zArr6 = this.passableDirs;
-                if (MapRenderer.isBlocked(i8 + 1, i9)) {
-                    z2 = false;
-                } else {
-                    z2 = true;
-                }
-                zArr6[1] = z2;
-                boolean[] zArr7 = this.passableDirs;
-                if (MapRenderer.isBlocked(i8, i9 - 1)) {
-                    z3 = false;
-                } else {
-                    z3 = true;
-                }
-                zArr7[2] = z3;
-                boolean[] zArr8 = this.passableDirs;
-                if (MapRenderer.isBlocked(i8 - 1, i9)) {
-                    z4 = false;
-                } else {
-                    z4 = true;
-                }
-                zArr8[3] = z4;
-                if (this.smartPathfinding) {
-                    i4 = ((this.target.x + 12) / 24) - ((this.x + TILE_HALF) / 24);
-                    i5 = ((this.target.y + 12) / 24) - ((this.y + TILE_HALF) / 24);
-                    if (Math.abs(i4) < PATHFIND_RANGE_LONG) {
-                        if (i4 != 0) {
-                            if (i4 > 0) {
-                                this.direction = 0;
-                            }
-                            if (i4 < 0) {
-                                this.direction = 2;
-                            }
-                            if (i5 > 0) {
-                                this.direction = 1;
-                            }
-                            if (i5 < 0) {
-                                this.direction = 3;
-                            }
-                            this.velocityX = 0;
-                            this.velocityY = 0;
-                            z5 = true;
+                            foundDirection = true;
                         } else {
-                            if (i4 > 0) {
-                                this.direction = 0;
-                            }
-                            if (i4 < 0) {
-                                this.direction = 2;
-                            }
-                            if (i5 > 0) {
-                                this.direction = 1;
-                            }
-                            if (i5 < 0) {
-                                this.direction = 3;
-                            }
-                            this.velocityX = 0;
-                            this.velocityY = 0;
-                            z5 = true;
+                            foundDirection = steerTowardPlayer(targetDx, targetDy);
                         }
                     }
                 }
-                if (!z5) {
+                if (!foundDirection) {
                     if (this.stuckTimer == 1) {
-                        while (i < 4) {
-                            byte b3 = this.dirPriority[Math.abs(ResourceManager.randomInt(4))];
-                            byte b4 = this.dirPriority[i];
-                            this.dirPriority[i] = this.dirPriority[b3];
-                            this.dirPriority[b3] = b4;
-                            i++;
-                        }
-                        this.velocityX = 0;
-                        this.velocityY = 0;
-                        i2 = 0;
-                        for (int j = 0; j < 4; j++) {
-                            if (this.passableDirs[this.dirPriority[j]]) {
-                                i2++;
-                            }
-                        }
-                        if (i2 > 0) {
-                            while (i3 < 4) {
-                                if (this.passableDirs[this.dirPriority[i3]]) {
-                                    this.direction = this.dirPriority[i3];
-                                    this.velocityX = this.dirVectorsX[this.dirPriority[i3]] * this.moveSpeed;
-                                    this.velocityY = this.dirVectorsY[this.dirPriority[i3]] * this.moveSpeed;
-                                    this.angle = this.direction * ANGLES_PER_DIR;
-                                    break;
-                                }
-                                i3++;
-                            }
-                        }
-                        this.stuckTimer = 0;
-                    } else if (this.passableDirs[this.direction]) {
-                        this.stuckTimer = STUCK_BASE + ResourceManager.randomInt(10);
-                        this.velocityX = 0;
-                        this.velocityY = 0;
-                    } else {
+                        pickRandomDirection(row, col);
+                    } else if (!this.passableDirs[this.direction] || ResourceManager.randomInt(10) == 0) {
                         this.stuckTimer = STUCK_BASE + ResourceManager.randomInt(10);
                         this.velocityX = 0;
                         this.velocityY = 0;
                     }
                 }
-                if (this.velocityX == 0) {
-                    GameLevel.setTileOccupant(i8 + this.dirVectorsY[this.direction], i9 + this.dirVectorsX[this.direction], this);
-                } else {
-                    GameLevel.setTileOccupant(i8 + this.dirVectorsY[this.direction], i9 + this.dirVectorsX[this.direction], this);
+                if (this.velocityX != 0 || this.velocityY != 0) {
+                    GameLevel.setTileOccupant(row + this.dirVectorsY[this.direction], col + this.dirVectorsX[this.direction], this);
                 }
             }
         }
         applyVelocity();
+    }
+
+    private boolean steerTowardPlayer(int targetDx, int targetDy) {
+        for (int i = 0; i < DIR_COUNT; i++) {
+            int dir = this.dirPriority[i];
+            if (!this.passableDirs[dir]) {
+                continue;
+            }
+            boolean towardPlayer;
+            switch (dir) {
+                case DIR_EAST:
+                    towardPlayer = targetDx > 0;
+                    break;
+                case DIR_SOUTH:
+                    towardPlayer = targetDy > 0;
+                    break;
+                case DIR_WEST:
+                    towardPlayer = targetDx < 0;
+                    break;
+                default:
+                    towardPlayer = targetDy < 0;
+                    break;
+            }
+            if (towardPlayer) {
+                setDirectionAndVelocity(dir);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void pickRandomDirection(int row, int col) {
+        for (int i = 0; i < DIR_COUNT; i++) {
+            byte swapWith = this.dirPriority[Math.abs(ResourceManager.randomInt(DIR_COUNT))];
+            byte tmp = this.dirPriority[i];
+            this.dirPriority[i] = this.dirPriority[swapWith];
+            this.dirPriority[swapWith] = tmp;
+        }
+        this.velocityX = 0;
+        this.velocityY = 0;
+        for (int i = 0; i < DIR_COUNT; i++) {
+            int dir = this.dirPriority[i];
+            if (this.passableDirs[dir] && isRoadTile(row + this.dirVectorsY[dir], col + this.dirVectorsX[dir])) {
+                setDirectionAndVelocity(dir);
+                this.stuckTimer = 0;
+                return;
+            }
+        }
+        for (int i = 0; i < DIR_COUNT; i++) {
+            int dir = this.dirPriority[i];
+            if (this.passableDirs[dir]) {
+                setDirectionAndVelocity(dir);
+                this.stuckTimer = 0;
+                return;
+            }
+        }
+        this.stuckTimer = 0;
+    }
+
+    private void setDirectionAndVelocity(int dir) {
+        this.direction = dir;
+        this.velocityX = this.dirVectorsX[dir] * this.moveSpeed;
+        this.velocityY = this.dirVectorsY[dir] * this.moveSpeed;
+        this.angle = dir * ANGLES_PER_DIR;
+    }
+
+    private static boolean isRoadTile(int row, int col) {
+        return MapRenderer.tileMap[row][col] >= ROAD_TILE_MIN && MapRenderer.tileMap[row][col] < ROAD_TILE_MAX;
     }
 
     @Override // p000.Sprite

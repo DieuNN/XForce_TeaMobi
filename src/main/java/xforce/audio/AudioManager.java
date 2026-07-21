@@ -136,7 +136,10 @@ public final class AudioManager implements Runnable {
                 pendingSfxIndex = NO_SFX_PENDING;
                 try {
                     if (sfxPlayers[sfxIndex].getState() != Player.STARTED && sfxVolume > 0) {
-                        ((VolumeControl) sfxPlayers[sfxIndex].getControl("VolumeControl")).setLevel(((sfxVolume * VOLUME_MULTIPLIER) * pendingSfxVolume) / MAX_SFX_VOLUME);
+                        VolumeControl vc = (VolumeControl) sfxPlayers[sfxIndex].getControl("VolumeControl");
+                        if (vc != null) {
+                            vc.setLevel(((sfxVolume * VOLUME_MULTIPLIER) * pendingSfxVolume) / MAX_SFX_VOLUME);
+                        }
                         sfxPlayers[sfxIndex].start();
                     }
                 } catch (MediaException ignored) {
