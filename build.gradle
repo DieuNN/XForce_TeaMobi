@@ -1,0 +1,71 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group = 'com.mobi.army2'
+version = '1.0.0'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.microemu:microemulator:2.0.4'
+    implementation 'org.microemu:microemu-midp:2.0.4'
+    implementation 'org.microemu:microemu-jsr-75:2.0.4'
+    implementation 'org.microemu:microemu-javase-swing:2.0.4'
+}
+
+application {
+    mainClass = 'org.microemu.app.Main'
+}
+
+tasks.named('run') {
+    args = [file('XForce.jar').absolutePath]
+    jvmArgs = [
+        '--add-opens=java.desktop/javax.swing=ALL-UNNAMED',
+        '--add-opens=java.desktop/javax.swing.plaf.basic=ALL-UNNAMED',
+        '--add-opens=java.desktop/sun.awt=ALL-UNNAMED',
+        '--add-opens=java.base/java.lang=ALL-UNNAMED',
+        '--add-opens=java.base/java.util=ALL-UNNAMED',
+        '--add-opens=java.base/java.io=ALL-UNNAMED',
+    ]
+}
+
+task runMidlet(type: JavaExec) {
+    group = 'application'
+    description = 'Run XForce MIDlet with MicroEmulator (modified sources)'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'org.microemu.app.Main'
+    args = [tasks.jar.archiveFile.get().asFile.absolutePath]
+    jvmArgs = [
+        '--add-opens=java.desktop/javax.swing=ALL-UNNAMED',
+        '--add-opens=java.desktop/javax.swing.plaf.basic=ALL-UNNAMED',
+        '--add-opens=java.desktop/sun.awt=ALL-UNNAMED',
+        '--add-opens=java.base/java.lang=ALL-UNNAMED',
+        '--add-opens=java.base/java.util=ALL-UNNAMED',
+        '--add-opens=java.base/java.io=ALL-UNNAMED',
+    ]
+    dependsOn tasks.jar
+}
+
+jar {
+    manifest {
+        attributes(
+            'Manifest-Version': '1.0',
+            'MIDlet-Vendor': 'TeaMobi',
+            'MIDlet-Version': '1.0.0',
+            'MIDlet-1': 'XForce,/icon.png,xforce.game.XMIDlet',
+            'MicroEdition-Configuration': 'CLDC-1.0',
+            'MIDlet-Name': 'XForce',
+            'MicroEdition-Profile': 'MIDP-2.0',
+            'Nokia-MIDlet-no-exit': 'true',
+        )
+    }
+}
