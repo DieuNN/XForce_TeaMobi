@@ -207,6 +207,8 @@ public final class VisualEffect extends GameEntity {
         }
     }
     private int getFrameIndex() {
-        return VOLUME_BASE - ((Math.abs((this.x - GameLevel.cameraX) - (GameLevel.viewportWidth >> 1)) + Math.abs((this.y - GameLevel.cameraY) - (GameLevel.viewportHeight >> 1))) / 2);
+        int frameIndex = VOLUME_BASE - ((Math.abs((this.x - GameLevel.cameraX) - (GameLevel.viewportWidth >> 1)) + Math.abs((this.y - GameLevel.cameraY) - (GameLevel.viewportHeight >> 1))) / 2);
+        System.out.println("VisualEffect.getFrameIndex: type=" + this.effectType + " frameIndex=" + frameIndex + " x=" + this.x + " y=" + this.y + " camX=" + GameLevel.cameraX + " camY=" + GameLevel.cameraY);
+        return frameIndex;
     }
 }

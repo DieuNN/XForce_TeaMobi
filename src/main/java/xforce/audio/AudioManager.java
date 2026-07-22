@@ -46,7 +46,9 @@ public final class AudioManager implements Runnable {
     }
 
     public static void playSfx(int sfxIndex, int volume) {
+        System.out.println("playSfx index=" + sfxIndex + " vol=" + volume + " sfxVol=" + sfxVolume);
         if (volume <= 0) {
+            System.out.println("playSfx SKIP: volume <= 0");
             return;
         }
         pendingSfxVolume = volume;
@@ -54,6 +56,7 @@ public final class AudioManager implements Runnable {
     }
 
     public static void playSfxMax(int sfxIndex) {
+        System.out.println("playSfxMax index=" + sfxIndex + " sfxVol=" + sfxVolume);
         pendingSfxVolume = MAX_SFX_VOLUME;
         pendingSfxIndex = sfxIndex;
     }
@@ -134,15 +137,21 @@ public final class AudioManager implements Runnable {
             if (pendingSfxIndex > NO_SFX_PENDING && pendingSfxIndex < sfxPlayers.length) {
                 int sfxIndex = pendingSfxIndex;
                 pendingSfxIndex = NO_SFX_PENDING;
+                System.out.println("audioThread: process sfx=" + sfxIndex + " state=" + sfxPlayers[sfxIndex].getState() + " sfxVol=" + sfxVolume + " pendVol=" + pendingSfxVolume);
                 try {
                     if (sfxPlayers[sfxIndex].getState() != Player.STARTED && sfxVolume > 0) {
                         VolumeControl vc = (VolumeControl) sfxPlayers[sfxIndex].getControl("VolumeControl");
                         if (vc != null) {
-                            vc.setLevel(((sfxVolume * VOLUME_MULTIPLIER) * pendingSfxVolume) / MAX_SFX_VOLUME);
+                            int level = ((sfxVolume * VOLUME_MULTIPLIER) * pendingSfxVolume) / MAX_SFX_VOLUME;
+                            vc.setLevel(level);
+                            System.out.println("audioThread: starting sfx=" + sfxIndex + " level=" + level);
                         }
                         sfxPlayers[sfxIndex].start();
+                    } else {
+                        System.out.println("audioThread: SKIP sfx=" + sfxIndex + " (already STARTED or sfxVol=0)");
                     }
                 } catch (MediaException ignored) {
+                    System.out.println("audioThread: MediaException on sfx=" + sfxIndex);
                 }
             }
             try {
