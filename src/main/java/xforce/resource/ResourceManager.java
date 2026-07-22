@@ -341,7 +341,7 @@ public final class ResourceManager {
     }
     public static final byte[] loadBytes(String path) {
         try {
-            InputStream in = "".getClass().getResourceAsStream(path);
+            InputStream in = ResourceManager.class.getResourceAsStream(path);
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             while (true) {
                 int b = in.read();

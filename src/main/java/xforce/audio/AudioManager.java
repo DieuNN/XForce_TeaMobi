@@ -29,11 +29,11 @@ public final class AudioManager implements Runnable {
         if (instance == null) {
             sfxPlayers = new Player[SFX_COUNT];
             try {
-                sfxPlayers[0] = Manager.createPlayer("".getClass().getResourceAsStream(soundPath + "/shoot.wav"), "audio/x-wav");
+                sfxPlayers[0] = Manager.createPlayer(AudioManager.class.getResourceAsStream(soundPath + "/shoot.wav"), "audio/x-wav");
                 sfxPlayers[0].prefetch();
-                sfxPlayers[1] = Manager.createPlayer("".getClass().getResourceAsStream(soundPath + "/explo.wav"), "audio/x-wav");
+                sfxPlayers[1] = Manager.createPlayer(AudioManager.class.getResourceAsStream(soundPath + "/explo.wav"), "audio/x-wav");
                 sfxPlayers[1].prefetch();
-                sfxPlayers[2] = Manager.createPlayer("".getClass().getResourceAsStream(soundPath + "/missile.wav"), "audio/x-wav");
+                sfxPlayers[2] = Manager.createPlayer(AudioManager.class.getResourceAsStream(soundPath + "/missile.wav"), "audio/x-wav");
                 sfxPlayers[2].prefetch();
             } catch (MediaException | IOException e) {
                 e.printStackTrace();
@@ -100,7 +100,7 @@ public final class AudioManager implements Runnable {
     public static void loadMusic(String filename) {
         closeMusic();
         try {
-            musicPlayer = Manager.createPlayer("".getClass().getResourceAsStream(soundPath + filename), "audio/midi");
+            musicPlayer = Manager.createPlayer(AudioManager.class.getResourceAsStream(soundPath + filename), "audio/midi");
             musicPlayer.setLoopCount(LOOP_INDEFINITELY);
             if (musicVolume > 0) {
                 musicPlayer.start();

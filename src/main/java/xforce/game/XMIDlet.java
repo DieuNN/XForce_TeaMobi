@@ -16,18 +16,18 @@ public class XMIDlet extends MIDlet {
         display = Display.getDisplay(this);
     }
 
-    protected void startApp() {
+    public void startApp() {
         display.setCurrent(gameCanvas);
         GameCanvas.resumeGame();
         AudioManager.startMusic();
     }
 
-    protected void pauseApp() {
+    public void pauseApp() {
         GameCanvas.pauseGame();
         AudioManager.stopMusic();
     }
 
-    protected void destroyApp(boolean z) {
+    public void destroyApp(boolean z) {
         GameCanvas.stopGame();
     }
     public final void m0a() {

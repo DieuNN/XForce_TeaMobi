@@ -1,10 +1,20 @@
 plugins {
     id 'java'
     id 'application'
+    alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.android.library) apply false
+    alias(libs.plugins.kotlin.android) apply false
 }
 
 group = 'com.mobi.army2'
 version = '1.0.0'
+
+ext {
+    compileSdk = 34
+    minSdk = 21
+    targetSdk = 34
+    ndkVersion = '28.2.13676358'
+}
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
